@@ -12,6 +12,7 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
+from telegram.request import HTTPXRequest
 
 import config
 import database
@@ -22,7 +23,20 @@ logger = logging.getLogger(__name__)
 
 
 def build_application() -> Application:
-    application = Application.builder().token(config.BOT_TOKEN).build()
+    # تایم‌اوت بالاتر برای جلوگیری از خطای TimedOut هنگام شروع سرد (cold start) روی هاست رایگان
+    request = HTTPXRequest(
+        connect_timeout=30.0,
+        read_timeout=30.0,
+        write_timeout=30.0,
+        pool_timeout=30.0,
+    )
+    application = (
+        Application.builder()
+        .token(config.BOT_TOKEN)
+        .request(request)
+        .get_updates_request(request)
+        .build()
+    )
 
     # ---- مکالمه خرید سرویس (انتخاب پلن -> ارسال رسید) ----
     purchase_conv = ConversationHandler(
