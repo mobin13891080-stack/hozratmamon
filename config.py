@@ -12,10 +12,13 @@ PANEL_URL = os.environ.get("PANEL_URL", "").rstrip("/")
 PANEL_USERNAME = os.environ.get("PANEL_USERNAME", "")
 PANEL_PASSWORD = os.environ.get("PANEL_PASSWORD", "")
 
-# اگر لینک توسو به‌صورت https:// داده شده باشد، خودکار به libsql:// تبدیل می‌شود
+# لینک توسو باید همان آدرس https:// باشد (نه libsql://)
+# چون آدرس libsql:// باعث می‌شود کتابخانه از پروتکل WebSocket استفاده کند که
+# روی هاست رندر با خطای WSServerHandshakeError(400) قطع می‌شود.
+# آدرس https:// باعث می‌شود کتابخانه از HTTP (پایدارتر و سازگارتر) استفاده کند.
 _turso_url = os.environ.get("TURSO_DATABASE_URL", "")
-if _turso_url.startswith("https://"):
-    _turso_url = "libsql://" + _turso_url[len("https://"):]
+if _turso_url.startswith("libsql://"):
+    _turso_url = "https://" + _turso_url[len("libsql://"):]
 TURSO_DATABASE_URL = _turso_url
 TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN", "")
 
