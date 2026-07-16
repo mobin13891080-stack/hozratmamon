@@ -80,7 +80,19 @@ async def init_db():
         "trial_enabled": "1",
         "trial_gb": "1",
         "trial_days": "1",
-        "welcome_text": "به ربات فروش سرویس خوش آمدید!",
+        "welcome_text": (
+            "✨ به ربات فروش سرویس VPN خوش آمدید! ✨\n"
+            "━━━━━━━━━━━━━━━\n"
+            "🚀 سریع  |  🔒 امن  |  ⚡️ بدون قطعی\n"
+            "━━━━━━━━━━━━━━━\n"
+            "از منوی زیر یکی از گزینه‌ها رو انتخاب کن 👇"
+        ),
+        "welcome_photo_id": "",
+        "support_text": (
+            "📞 پشتیبانی\n━━━━━━━━━━━━━━━\n"
+            "برای ارتباط با پشتیبانی به آیدی زیر پیام دهید:\n@YourSupportUsername"
+        ),
+        "bot_enabled": "1",
     }
     for key, value in defaults.items():
         current = await get_setting(key)

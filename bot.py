@@ -3,6 +3,7 @@
 # نقطه شروع ربات - ثبت همه هندلرها و اجرای ربات با Webhook (برای Render)
 
 import logging
+import re
 
 from telegram.ext import (
     Application,
@@ -62,11 +63,14 @@ def build_application() -> Application:
             CallbackQueryHandler(handlers.admin_generic_setting_start, pattern="^admin_forcejoin_setchannel$"),
             CallbackQueryHandler(handlers.admin_generic_setting_start, pattern="^admin_trial_setgb$"),
             CallbackQueryHandler(handlers.admin_generic_setting_start, pattern="^admin_trial_setdays$"),
-            CallbackQueryHandler(handlers.admin_generic_setting_start, pattern="^admin_welcome$"),
             CallbackQueryHandler(handlers.admin_admins_add_start, pattern="^admin_admins_add$"),
+            MessageHandler(filters.Regex(rf"^{re.escape(handlers.BTN_ADMIN_WELCOME)}$"), handlers.admin_welcome_start),
+            MessageHandler(filters.Regex(rf"^{re.escape(handlers.BTN_ADMIN_WELCOME_PHOTO)}$"), handlers.admin_welcome_photo_start),
+            MessageHandler(filters.Regex(rf"^{re.escape(handlers.BTN_ADMIN_SUPPORT_TEXT)}$"), handlers.admin_support_text_start),
         ],
         states={
             handlers.AWAITING_ADMIN_INPUT: [
+                MessageHandler(filters.PHOTO, handlers.admin_receive_photo_input),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.admin_receive_input),
                 CommandHandler("cancel", handlers.admin_cancel),
             ],
@@ -81,28 +85,21 @@ def build_application() -> Application:
     application.add_handler(admin_conv)
 
     application.add_handler(CallbackQueryHandler(handlers.check_join_callback, pattern="^check_join$"))
-    application.add_handler(CallbackQueryHandler(handlers.menu_buy_callback, pattern="^menu_buy$"))
-    application.add_handler(CallbackQueryHandler(handlers.menu_trial_callback, pattern="^menu_trial$"))
-    application.add_handler(CallbackQueryHandler(handlers.menu_account_callback, pattern="^menu_account$"))
-    application.add_handler(CallbackQueryHandler(handlers.menu_admin_callback, pattern="^menu_admin$"))
-    application.add_handler(CallbackQueryHandler(handlers.back_main_callback, pattern="^back_main$"))
 
     application.add_handler(CallbackQueryHandler(handlers.admin_packages_callback, pattern="^admin_packages$"))
     application.add_handler(CallbackQueryHandler(handlers.admin_pkg_edit_menu, pattern=r"^admin_pkg_edit:\d+$"))
     application.add_handler(CallbackQueryHandler(handlers.admin_pkg_toggle, pattern=r"^admin_pkg_toggle:\d+$"))
     application.add_handler(CallbackQueryHandler(handlers.admin_pkg_delete, pattern=r"^admin_pkg_delete:\d+$"))
 
-    application.add_handler(CallbackQueryHandler(handlers.admin_card_callback, pattern="^admin_card$"))
-    application.add_handler(CallbackQueryHandler(handlers.admin_forcejoin_callback, pattern="^admin_forcejoin$"))
     application.add_handler(CallbackQueryHandler(handlers.admin_forcejoin_toggle, pattern="^admin_forcejoin_toggle$"))
-    application.add_handler(CallbackQueryHandler(handlers.admin_trial_callback, pattern="^admin_trial$"))
     application.add_handler(CallbackQueryHandler(handlers.admin_trial_toggle, pattern="^admin_trial_toggle$"))
-    application.add_handler(CallbackQueryHandler(handlers.admin_admins_callback, pattern="^admin_admins$"))
     application.add_handler(CallbackQueryHandler(handlers.admin_admins_remove, pattern=r"^admin_admins_remove:-?\d+$"))
-    application.add_handler(CallbackQueryHandler(handlers.admin_stats_callback, pattern="^admin_stats$"))
 
     application.add_handler(CallbackQueryHandler(handlers.order_approve_callback, pattern=r"^order_approve:\d+$"))
     application.add_handler(CallbackQueryHandler(handlers.order_reject_callback, pattern=r"^order_reject:\d+$"))
+
+    # مسیریاب اصلی منوی متنی ثابت (ReplyKeyboard) - باید بعد از مکالمه‌ها ثبت شود
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.main_menu_router))
 
     return application
 
